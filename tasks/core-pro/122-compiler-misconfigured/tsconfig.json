@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES5",
-    "moduleResolution": "node10",
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
     "allowImportingTsExtensions": true,
     "esModuleInterop": false,
     "skipLibCheck": true,

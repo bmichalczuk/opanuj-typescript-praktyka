@@ -1,7 +1,10 @@
-interface Message {
-  type: MessageType;
-}
+type MessageType = 'orderCreated' | 'orderCancelled';
+type MessagePayload = OrderCreatedMessage['payload'] | OrderCancelledMessage['payload'];
 
+interface Message<T extends OrderCancelledMessage | OrderCreatedMessage> {
+  type: T['type'];
+  payload: T['payload'];
+}
 interface Order {
   orderId: string;
   items: { productId: string; quantity: number }[];
@@ -18,14 +21,57 @@ export interface OrderCancelledMessage {
 }
 
 export class MessageBus {
-  private subscribers: any;
+  private subscribers: {
+    orderCreated: ((message: OrderCreatedMessage) => void)[];
+    orderCancelled: ((message: OrderCancelledMessage) => void)[];
+  };
 
-  subscribe(type: any, subscriber: (message: any) => void): void {
-    throw new Error('Not implemented');
+  private orders: Map<string, Order>;
+  constructor() {
+    this.subscribers = {
+      orderCreated: [],
+      orderCancelled: [],
+    };
+
+    this.orders = new Map();
   }
 
-  publish(message: any): void {
-    throw new Error('Not implemented');
+  subscribe<T extends OrderCancelledMessage | OrderCreatedMessage>(
+    type: T['type'],
+    subscriber: (message: Message<T>) => void,
+  ): void {
+    if (type === 'orderCreated') {
+      this.subscribers.orderCreated.push(subscriber);
+    } else if (type === 'orderCancelled') {
+      this.subscribers.orderCancelled.push(subscriber);
+    } else {
+      throw new Error(`Unknown message type: ${type}`);
+    }
+    //throw new Error('Not implemented');
+  }
+
+  publish<T extends OrderCancelledMessage | OrderCreatedMessage>(message: T): void {
+    // throw new Error('Not implemented');
+    if (message.type === 'orderCreated') {
+      this.orders.set(message.payload.orderId, message.payload);
+      this.subscribers.orderCreated.forEach((subscriber) => {
+        subscriber(message);
+      });
+      return;
+    }
+    if (message.type === 'orderCancelled') {
+      this.subscribers.orderCancelled.forEach((subscriber) => {
+        subscriber(message);
+      });
+      return;
+    }
+  }
+  getOrderDetails(orderId: string) {
+    const order = this.orders.get(orderId);
+    if (!order) {
+      throw new Error(`Order with ID ${orderId} not found`);
+    }
+    return order.items;
   }
 }
 
@@ -38,7 +84,28 @@ export class InventoryStockTracker {
   }
 
   private subscribeToMessages(): void {
-    throw new Error('Not implemented');
+    this.bus.subscribe<OrderCreatedMessage>('orderCreated', (message: OrderCreatedMessage) => {
+      message.payload.items.forEach((item) => {
+        if (this.stock[item.productId] > item.quantity) {
+          this.stock[item.productId] -= item.quantity;
+        } else {
+          throw new Error(`Insufficient stock for product ${item.productId}`);
+        }
+      });
+    });
+
+    this.bus.subscribe<OrderCancelledMessage>(
+      'orderCancelled',
+      (message: OrderCancelledMessage) => {
+        const orderItems = this.bus.getOrderDetails(message.payload.orderId);
+        // if (!this.stock[message.payload.orderId]) {
+        //    throw new Error(`Order ${message.payload.orderId} not found`);
+        // }
+        orderItems.forEach((item) => {
+          this.stock[item.productId] += item.quantity;
+        });
+      },
+    );
   }
 
   getStock(productId: string): number {

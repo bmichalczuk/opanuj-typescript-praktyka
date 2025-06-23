@@ -3,7 +3,11 @@ type Person = {
   lastName: string;
 };
 
-type FieldExtender<T, K> = Person;
+type FieldExtender<T, K> = {
+  [P in keyof T]: {
+    value: T[P];
+  } & K;
+};
 
 type PersonUpdateHistory = FieldExtender<
   Person,

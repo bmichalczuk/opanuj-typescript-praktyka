@@ -4,6 +4,7 @@ type FirstScan = '🌳[🔥]🌳[0$]🌲⚡️[100$]⚡️🌳🌳🌳';
 type SecondScan = '🌲🌳⚡️[20$]⚡️🌲🌲[0$]🌲[🔥]🌲';
 type ThirdScan = '🌳🌲[❌]🌳🌳[🔥]⚡️🌳🌲';
 
+
 export function terrainScanResults() {
   const result1: RewardRadar<FirstScan> = '100$';
   const result2: RewardRadar<SecondScan> = '20$';

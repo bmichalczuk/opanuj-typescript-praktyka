@@ -2,7 +2,13 @@
   Dodaj typowanie propsa children dla TripleContainer, które wymusi przekazanie dokładnie trzech komponentów lub elementów HTML.
 */
 
-const TripleContainer = ({ children }) => <ul className="list-disc">{children}</ul>;
+import { ReactElement } from 'react';
+
+const TripleContainer = ({
+  children,
+}: {
+  children: [ReactElement, ReactElement, ReactElement];
+}) => <ul className="list-disc">{children}</ul>;
 
 const App = () => (
   <TripleContainer>

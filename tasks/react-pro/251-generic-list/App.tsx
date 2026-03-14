@@ -1,12 +1,14 @@
 /* Dodaj typ generyczne do komponentu List, który pozwoli na dynamiczne wnioskowanie typu elementów listy oraz funkcji renderującej. Wymagaj aby elementy listy miały właściwość id.
  */
 
-interface ListProps {
-  items: any;
-  renderItem: any;
+import React from 'react';
+type IdType = number | string;
+interface ListProps<T extends { id: IdType }> {
+  items: T[];
+  renderItem: (item: T) => React.ReactNode;
 }
 
-export const List = ({ items, renderItem }: ListProps) => (
+export const List = <T extends { id: IdType }>({ items, renderItem }: ListProps<T>) => (
   <ul>
     {items.map((item) => (
       <li key={item.id}>{renderItem(item)}</li>
